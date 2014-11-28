@@ -1,0 +1,45 @@
+---
+- name: Load flannel parameters for EC2
+  include_vars: ec2.yml
+
+- name: Get existing user-data from EC2
+  script: cfstack.py {{ stack_name }}
+  register: stack_status
+  changed_when: False
+
+- name: Generate user-data
+  set_fact:
+    # We have to use relative path due to this [issue](https://github.com/ansible/ansible/issues/9317)
+    user_data: "{{ lookup('template', '../templates/user-data.j2') | b64encode }}"
+  when: not stack_status.stdout
+
+- name: Use existing user-data
+  set_fact:
+    user_data: "{{ stack_status.stdout }}"
+  when: stack_status.stdout
+
+- name: Copy cloudformation template to /tmp
+  copy: src=coreos-stable-pv.template dest=/tmp/coreos-stable-pv.template
+  changed_when: False
+
+- name: Launch ansible cloudformation stack
+  cloudformation:
+    stack_name: "{{ stack_name }}"
+    state: "{{ state }}"
+    region: "{{ region }}"
+    disable_rollback: true
+    template: /tmp/coreos-stable-pv.template
+    template_parameters:
+      KeyPair: "{{ key_pair }}"
+      InstanceType: "{{ instance_type }}"
+      AllowSSHFrom: 0.0.0.0/0
+      ClusterSize: "{{ num_instances }}"
+      UserData: "{{ user_data }}"
+    tags:
+      Stack: "{{ stack_name }}"
+      Owner: "{{ lookup('pipe', 'git config user.name') }}"
+      Purpose: Testing CoreOS cluster creation via cloud-formation
+
+- name: Clean up
+  file: path=/tmp/coreos-stable-pv.template state=absent
+  changed_when: False

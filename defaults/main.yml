@@ -1,0 +1,7 @@
+---
+# defaults file for coreos
+provisioner: vagrant
+num_instances: 3
+stack_name: ansible-cloudformation
+region: us-east-1
+instance_type: m3.medium

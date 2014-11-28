@@ -1,0 +1,3 @@
+---
+# tasks file for coreos
+- include: "{{ provisioner }}.yml"

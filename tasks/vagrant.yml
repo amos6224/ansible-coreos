@@ -1,0 +1,30 @@
+---
+# Get Vagrant status. We consider Vagrant to be up when
+# the first VM is in 'running' state.
+- name: Get vagrant status
+  shell: vagrant status | grep '^core-01' | awk '{ print $2 }'
+  register: vagrant_status
+  changed_when: false
+
+- name: Determine whether vagrant is already up
+  set_fact: >
+    vagrant_down={{ vagrant_status.stdout != 'running' }}
+
+- name: Load flannel parameters for vagrant
+  include_vars: vagrant.yml
+
+- name: Generate user-data
+  template: src=user-data.j2 dest=./user-data
+  when: vagrant_down and state == 'present'
+
+- name: Generate Vagrantfile
+  template: src=Vagrantfile.j2 dest=./Vagrantfile
+  when: vagrant_down and state == 'present'
+
+- name: vagrant up
+  command: vagrant up
+  when: vagrant_down and state == 'present'
+
+- name: vagrant destroy
+  command: vagrant destroy -f
+  when: not vagrant_down and state == 'absent'

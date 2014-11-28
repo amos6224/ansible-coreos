@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - { role: coreos, provisioner: ec2, stack_name: test-stack, num_instances: 3, key_pair: benbria, instance_type: m3.medium, state: absent }
