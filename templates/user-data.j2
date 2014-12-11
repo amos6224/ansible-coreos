@@ -19,6 +19,7 @@ coreos:
       [Unit]
       Requires=flannel.service
       After=flannel.service
+      ConditionPathExists=/run/flannel/subnet.env
 
       [Service]
       EnvironmentFile=/run/flannel/subnet.env
