@@ -1,0 +1,4 @@
+tests/Vagrantfile
+tests/user-data
+.vagrant
+
