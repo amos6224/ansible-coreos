@@ -5,4 +5,10 @@
   vars:
     state: present
   roles:
-    - { role: coreos, provisioner: vagrant, stack_name: test-stack, num_instances: 3, key_pair: benbria, instance_type: m3.medium, state: "{{ state }}" }
+    - role: coreos
+      provisioner: vagrant
+      stack_name: test-stack
+      num_instances: 3
+      key_pair: benbria
+      instance_type: m3.medium
+      state: "{{ state }}"
